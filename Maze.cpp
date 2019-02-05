@@ -21,10 +21,12 @@ its coordinates.
 #include <array>
 #include <vector>
 #include <algorithm>
-#include <functional>
+#include <cmath>
+//#include <functional>
 #include <string>
-#include <iterator>
-#include <stack>
+//#include <iterator>
+//#include <stack>
+#include <queue>
 using namespace std;
 
 
@@ -47,7 +49,7 @@ vector<string> finishTile = getFinishSquare();
 vector<string> blockTile = getBlockSquare();
 vector<string> openTile = getOpenSquare();
 vector<vector<vector<string> > > mazeGrid;
-stack<int> userPath;
+queue<int> userPath;
 
 
 ////////////////////////////////////////////MAIN FUNCTION////////////////////////////////////////////////////
@@ -74,7 +76,8 @@ vector<vector<vector<string> > > createMaze(void) {
 	fileIn >> finishX >> finishY;
 
 	//Stub used to declare the size of the maze grid
-	cout << "Grid size: (" << xAxis << ", " << yAxis << ")." << endl;
+	cout << "Welcome to my maze!" << endl;
+	cout << endl;
 
 	//"If" statement verifies that the coordinates don't go beyond the grid size
 	if (startX > xAxis || finishX > xAxis || startY > yAxis || finishY > yAxis || 
@@ -125,6 +128,8 @@ void printSquare(vector<vector<vector<string> > > &mazeGrid){
 	int userMove;
 	int userX;
 	int userY;
+	int currentDistance; //used to mark current user tile Manhattan Distance from finish tile
+	vector<int> manhattanDistances;
 
 	//Initialize variables
 	userX = startX;
@@ -151,11 +156,12 @@ void printSquare(vector<vector<vector<string> > > &mazeGrid){
 		}
 
 		//Menu/Key Legend
+		cout << endl;
 		cout << "Select your next move:" << endl;
-		cout << "8: Up" << endl;
-		cout << "4: Left" << endl;
-		cout << "6: Right" << endl;
-		cout << "2: Down" << endl;
+		cout << "8: ^ Up" << endl;
+		cout << "4: < Left" << endl;
+		cout << "6: > Right" << endl;
+		cout << "2: v Down" << endl;
 
 		//Variable captures the key entered by the user
 		cin >> userMove;
@@ -175,9 +181,11 @@ void printSquare(vector<vector<vector<string> > > &mazeGrid){
 				mazeGrid[userY][userX] = userTile;
 			}
 			else {
-				userPath.push(userY);
 				userPath.push(userX);
+				userPath.push(userY);
 				mazeGrid[userY][userX] = userTile;
+				currentDistance = abs((userX - finishX) + (userY - finishY));
+				manhattanDistances.push_back(currentDistance);
 			}
 		}
 		else if (userMove == 4) {//////////////If user chooses to go left.....
@@ -194,9 +202,11 @@ void printSquare(vector<vector<vector<string> > > &mazeGrid){
 				mazeGrid[userY][userX] = userTile;
 			}
 			else {
-				userPath.push(userY);
 				userPath.push(userX);
+				userPath.push(userY);
 				mazeGrid[userY][userX] = userTile;
+				currentDistance = abs((userX - finishX) + (userY - finishY));
+				manhattanDistances.push_back(currentDistance);
 			}
 		}
 		else if (userMove == 6) {///////////////If user chooses to go right.....
@@ -213,9 +223,11 @@ void printSquare(vector<vector<vector<string> > > &mazeGrid){
 				mazeGrid[userY][userX] = userTile;
 			}
 			else {
-				userPath.push(userY);
 				userPath.push(userX);
+				userPath.push(userY);
 				mazeGrid[userY][userX] = userTile;
+				currentDistance = abs((userX - finishX) + (userY - finishY));
+				manhattanDistances.push_back(currentDistance);
 			}
 		}
 		else if (userMove == 2) {/////////////If user chooses to go down.....
@@ -232,25 +244,39 @@ void printSquare(vector<vector<vector<string> > > &mazeGrid){
 				mazeGrid[userY][userX] = userTile;
 			}
 			else {
-				userPath.push(userY);
 				userPath.push(userX);
+				userPath.push(userY);
 				mazeGrid[userY][userX] = userTile;
+				currentDistance = abs((userX - finishX) + (userY - finishY));
+				manhattanDistances.push_back(currentDistance);
 			}
 		}
 		else///////////////If user enters a value that doesn't match up/down/left/right.....
 			cout << "Invalid Entry. Please enter a valid direction." << endl;
-		
+
 		//When the user finds the finish....
 		if (userX == finishY && userY == finishX) {
+			make_heap(manhattanDistances.begin(), manhattanDistances.end());
+
 			cout << "Congratulations, you win!" << endl;
+			cout << endl;
 			cout << "User path taken was: " << endl;
 			do{//This do-while loop displays all moves from the stack
-				cout << "(" << userPath.top();
+				cout << "(" << userPath.front();
 				userPath.pop();
 				cout << ", ";
-				cout << userPath.top() << ")" << endl;;
+				cout << userPath.front() << ")   ";
 				userPath.pop();
 			} while (!userPath.empty());
+			cout << endl;
+			cout << endl;
+			cout << "The Manhattan Distances from greatest to least is : " << endl;
+			while (!manhattanDistances.empty()) {
+				cout << manhattanDistances.front() << ", ";
+				pop_heap(manhattanDistances.begin(), manhattanDistances.end()); 
+				manhattanDistances.pop_back();
+			}
+			cout << endl;
 			break;
 		}
 	} while (!(userY == finishY && userX == finishX));
